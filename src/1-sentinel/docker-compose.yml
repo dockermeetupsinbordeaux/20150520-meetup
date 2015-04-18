@@ -1,0 +1,22 @@
+data:
+  image: cogniteev/echo
+  volumes:
+    - /data
+redis:
+  image: redis
+  volumes_from:
+    - data
+  net: host
+sentinel:
+  command: wlan0
+  build: sentinel
+  net: host
+  volumes_from:
+    - data
+
+web:
+  build: ./web
+  command: python app.py
+  ports:
+   - "5000:5000"
+  net: host
