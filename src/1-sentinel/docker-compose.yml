@@ -2,21 +2,82 @@ data:
   image: cogniteev/echo
   volumes:
     - /data
-redis:
+redisnode1:
   image: redis
+  command: >
+    redis-server --logfile /data/redisnode1.log
+                 --dbfilename redisnode1.rdb
+                 --save 30 1
   volumes_from:
     - data
-  net: host
-sentinel:
-  command: wlan0
+
+redisnode2:
+  image: redis
+  command: > 
+    redis-server --slaveof master 6379 
+                 --logfile /data/redisnode2.log
+                 --dbfilename redisnode2.rdb
+                 --save 30 1
+  links:
+    - redisnode1:master
+  volumes_from:
+    - data
+
+redisnode3:
+  image: redis
+  command: >
+    redis-server --slaveof master 6379
+                 --logfile /data/redisnode3.log
+                 --dbfilename redisnode3.rdb
+                 --save 30 1
+  links:
+    - redisnode1:master
+  volumes_from:
+    - data
+
+redissentinel1:
   build: sentinel
-  net: host
   volumes_from:
     - data
+  links:
+    - redisnode1:master
+    - redisnode2
+    - redisnode3
+  environment:
+    SENTINEL_NAME: redissentinel1
+
+redissentinel2:
+  build: sentinel
+  volumes_from:
+    - data
+  links:
+    - redisnode1:master
+    - redisnode2
+    - redisnode3
+  environment:
+    SENTINEL_NAME: redissentinel2
+
+redissentinel3:
+  build: sentinel
+  volumes_from:
+    - data
+  links:
+    - redisnode1:master
+    - redisnode2
+    - redisnode3
+  environment:
+    SENTINEL_NAME: redissentinel3
+
 
 web:
   build: ./web
   command: python app.py
   ports:
    - "5000:5000"
-  net: host
+  links:
+    - redisnode1
+    - redisnode2
+    - redisnode3
+    - redissentinel1
+    - redissentinel2
+    - redissentinel3
