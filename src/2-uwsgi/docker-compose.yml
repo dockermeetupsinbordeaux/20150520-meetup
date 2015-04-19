@@ -68,7 +68,7 @@ redissentinel3:
   environment:
     SENTINEL_NAME: redissentinel3
 
-web:
+web1:
   build: ./web
   command: uwsgi --socket 0.0.0.0:5000 -w app:app --logto /data/flask.log
   links:
@@ -79,9 +79,22 @@ web:
     - redissentinel2
     - redissentinel3
 
+web2:
+  build: ./web
+  command: uwsgi --socket 0.0.0.0:5000 -w app:app --logto /data/flask.log
+  links:
+    - redisnode1
+    - redisnode2
+    - redisnode3
+    - redissentinel1
+    - redissentinel2
+    - redissentinel3
+
+
 webproxy:
-  build: ./web-proxy
+  build: ./webproxy
   ports:
     - "80:80"
   links:
-    - web:upstream1
+    - web1:upstream1
+    - web2:upstream2
