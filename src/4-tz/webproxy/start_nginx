@@ -1,0 +1,8 @@
+#!/bin/sh
+
+su - nginx
+mkdir -p /data/log/nginx
+mkdir -p /data/run/
+sed -e "s/@UPSTREAM1@/${UPSTREAM1_PORT_5000_TCP_ADDR}:${UPSTREAM1_PORT_5000_TCP_PORT}/" -i /etc/nginx/nginx.conf
+sed -e "s/@UPSTREAM2@/${UPSTREAM2_PORT_5000_TCP_ADDR}:${UPSTREAM2_PORT_5000_TCP_PORT}/" -i /etc/nginx/nginx.conf
+nginx
