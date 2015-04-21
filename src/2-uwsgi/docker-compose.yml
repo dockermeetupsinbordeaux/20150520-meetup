@@ -70,7 +70,7 @@ redissentinel3:
 
 web1:
   build: ./web
-  command: uwsgi --socket 0.0.0.0:5000 -w app:app --logto /data/flask.log
+  command: uwsgi --socket 0.0.0.0:5000 -w app:app --logto /data/flask1.log
   links:
     - redisnode1
     - redisnode2
@@ -81,7 +81,7 @@ web1:
 
 web2:
   build: ./web
-  command: uwsgi --socket 0.0.0.0:5000 -w app:app --logto /data/flask.log
+  command: uwsgi --socket 0.0.0.0:5000 -w app:app --logto /data/flask2.log
   links:
     - redisnode1
     - redisnode2
