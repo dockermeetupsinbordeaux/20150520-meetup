@@ -1,0 +1,131 @@
+logs:
+  image: cogniteev/echo
+  volumes:
+    - /logs
+    - /etc/localtime:/etc/localtime:ro
+data:
+  image: cogniteev/echo
+  volumes:
+    - /data
+redisnode1:
+  build: redis
+  command: >
+    redis-server --logfile /logs/redisnode1.log
+                 --dbfilename redisnode1.rdb
+                 --save 30 1
+  volumes_from:
+    - data
+    - logs
+
+redisnode2:
+  build: redis
+  command: > 
+    redis-server --slaveof master 6379 
+                 --logfile /logs/redisnode2.log
+                 --dbfilename redisnode2.rdb
+                 --save 30 1
+  links:
+    - redisnode1:master
+  volumes_from:
+    - data
+    - logs
+
+redisnode3:
+  build: redis
+  command: >
+    redis-server --slaveof master 6379
+                 --logfile /logs/redisnode3.log
+                 --dbfilename redisnode3.rdb
+                 --save 30 1
+  links:
+    - redisnode1:master
+  volumes_from:
+    - data
+    - logs
+
+redissentinel1:
+  build: sentinel
+  volumes_from:
+    - data
+    - logs
+  links:
+    - redisnode1:master
+    - redisnode2
+    - redisnode3
+  environment:
+    SENTINEL_NAME: redissentinel1
+
+redissentinel2:
+  build: sentinel
+  volumes_from:
+    - data
+    - logs
+  links:
+    - redisnode1:master
+    - redisnode2
+    - redisnode3
+  environment:
+    SENTINEL_NAME: redissentinel2
+
+redissentinel3:
+  build: sentinel
+  volumes_from:
+    - data
+    - logs
+  links:
+    - redisnode1:master
+    - redisnode2
+    - redisnode3
+  environment:
+    SENTINEL_NAME: redissentinel3
+
+web1:
+  build: ./web
+  command: uwsgi --socket 0.0.0.0:5000 -w app:app --logto /logs/web1.log
+  links:
+    - redisnode1
+    - redisnode2
+    - redisnode3
+    - redissentinel1
+    - redissentinel2
+    - redissentinel3
+  volumes_from:
+    - logs
+
+web2:
+  build: ./web
+  command: uwsgi --socket 0.0.0.0:5000 -w app:app --logto /logs/web2.log
+  links:
+    - redisnode1
+    - redisnode2
+    - redisnode3
+    - redissentinel1
+    - redissentinel2
+    - redissentinel3
+  volumes_from:
+    - logs
+
+webproxy:
+  build: ./webproxy
+  ports:
+    - "80:80"
+  links:
+    - web1:upstream1
+    - web2:upstream2
+  volumes_from:
+    - logs
+
+elasticsearch:
+  image: elasticsearch
+
+logstash:
+  build: logstash
+  links:
+    - elasticsearch
+
+rsyslog:
+  build: rsyslog
+  links:
+    - logstash
+  volumes_from:
+    - logs
