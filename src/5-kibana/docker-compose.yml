@@ -124,8 +124,8 @@ logstash:
     - elasticsearch
 
 rsyslog:
-  build: rsyslog
-  links:
-    - logstash
-  volumes_from:
-    - logs
+ build: rsyslog
+ links:
+   - logstash
+ volumes_from:
+   - logs
