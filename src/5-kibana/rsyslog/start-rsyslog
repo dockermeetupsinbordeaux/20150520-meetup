@@ -1,6 +1,12 @@
-#!/bin/sh
+#!/bin/bash
 
-sed "s/LOGSTASH_ADDR/$LOGSTASH_PORT_514_TCP_ADDR/" -i /etc/rsyslog.d/meetup/imfiles.conf
-sed "s/LOGSTASH_PORT/$LOGSTASH_PORT_514_TCP_PORT/" -i /etc/rsyslog.d/meetup/imfiles.conf
+REPLACE=(
+  "s/LOGSTASH_ADDR/$LOGSTASH_PORT_514_TCP_ADDR/;"
+  "s/LOGSTASH_PORT/$LOGSTASH_PORT_514_TCP_PORT/;"
+)
+sed -i.bak -e "${REPLACE[*]}" /etc/rsyslog.d/meetup/imfiles.conf
+
+#sed "s/LOGSTASH_ADDR/$LOGSTASH_PORT_514_TCP_ADDR/;" -i /etc/rsyslog.d/meetup/imfiles.conf
+#sed "s/LOGSTASH_PORT/$LOGSTASH_PORT_514_TCP_PORT/;" -i /etc/rsyslog.d/meetup/imfiles.conf
 
 exec rsyslogd -n
