@@ -126,6 +126,13 @@ logstash:
 rsyslog:
  build: rsyslog
  links:
-   - logstash
+   - logstash:logstash
  volumes_from:
    - logs
+
+kibana:
+  image: marcbachmann/kibana4
+  links:
+    - elasticsearch:elasticsearch
+  ports:
+    - "5601:5601"
