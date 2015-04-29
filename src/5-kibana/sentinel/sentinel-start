@@ -16,7 +16,7 @@ sentinel monitor "$CLUSTER_NAME" "$MASTER_PORT_6379_TCP_ADDR" "$MASTER_PORT_6379
 sentinel down-after-milliseconds "$CLUSTER_NAME" 5000
 sentinel failover-timeout "$CLUSTER_NAME" 180000
 sentinel parallel-syncs "$CLUSTER_NAME" 1
-logfile "/logs/${SENTINEL_NAME}.log"
+logfile "/var/log/containers/${SENTINEL_NAME}.log"
 EOF
 
 exec redis-server /etc/sentinel.conf --sentinel --loglevel verbose
