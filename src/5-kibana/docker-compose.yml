@@ -19,8 +19,8 @@ redisnode1:
 
 redisnode2:
   build: redis
-  command: > 
-    redis-server --slaveof master 6379 
+  command: >
+    redis-server --slaveof master 6379
                  --logfile /var/log/containers/redisnode2.log
                  --dbfilename redisnode2.rdb
                  --save 30 1
