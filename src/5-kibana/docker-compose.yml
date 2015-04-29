@@ -122,13 +122,15 @@ logstash:
   build: logstash
   links:
     - elasticsearch
+  volumes_from:
+    - logs
 
 rsyslog:
- build: rsyslog
- links:
-   - logstash:logstash
- volumes_from:
-   - logs
+  image: cogniteev/rsyslogstash
+  volumes_from:
+    - logs
+  links:
+    - logstash:logstash
 
 kibana:
   image: marcbachmann/kibana4
