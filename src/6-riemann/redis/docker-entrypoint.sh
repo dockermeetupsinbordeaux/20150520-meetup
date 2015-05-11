@@ -3,8 +3,10 @@ set -e
 
 if [ "$1" = 'redis-server' ]; then
 	chown -R redis .
-	chown -R redis /var/log/containers
+    if [ -d "/var/log/containers" ] ;then
+    	chown -R redis /var/log/containers
+    fi
 	exec gosu redis "$@"
 fi
 
-exec "$@
+exec "$@"
