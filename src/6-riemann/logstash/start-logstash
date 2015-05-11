@@ -1,0 +1,6 @@
+#!/bin/sh
+
+sed "s/ELASTICSEARCH_ADDR/$ELASTICSEARCH_PORT_9300_TCP_ADDR/" -i /config-dir/logstash.conf
+sed "s/ELASTICSEARCH_PORT/$ELASTICSEARCH_PORT_9300_TCP_PORT/" -i /config-dir/logstash.conf
+
+exec logstash -f /config-dir/logstash.conf

@@ -1,0 +1,22 @@
+#!/bin/sh -e
+
+# Default settings when sentinel is running without `link`
+# to redis master container and/or
+# when sentinel is using the host network stack
+# (with --net=host docker run option)
+
+if [ "x${MASTER_PORT_6379_TCP_ADDR}" = x ] ;then
+    INTERFACE=${1:-eth1}
+    MASTER_PORT_6379_TCP_ADDR=`ip -f inet -o addr  | grep $INTERFACE | awk '{print $4}' | cut -d/ -f1`
+    MASTER_PORT_6379_TCP_PORT=${MASTER_PORT_6379_TCP_PORT:-6379}
+fi
+
+cat << EOF > /etc/sentinel.conf
+sentinel monitor "$CLUSTER_NAME" "$MASTER_PORT_6379_TCP_ADDR" "$MASTER_PORT_6379_TCP_PORT" 1
+sentinel down-after-milliseconds "$CLUSTER_NAME" 5000
+sentinel failover-timeout "$CLUSTER_NAME" 180000
+sentinel parallel-syncs "$CLUSTER_NAME" 1
+logfile "/var/log/containers/${SENTINEL_NAME}.log"
+EOF
+
+exec redis-server /etc/sentinel.conf --sentinel --loglevel verbose
