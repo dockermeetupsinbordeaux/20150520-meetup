@@ -2,7 +2,6 @@ logs:
   image: cogniteev/echo
   volumes:
     - /var/log/containers
-    - /etc/localtime:/etc/localtime:ro
 data:
   image: cogniteev/echo
   volumes:
