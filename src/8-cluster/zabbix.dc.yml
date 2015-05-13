@@ -6,21 +6,21 @@ zbxdata:
     - /var/lib/mysql
 
 zbxmysql:
-  build: zabbix-mysql
+  image: dockermeetupsinbordeaux/20150520-meetup-zabbix-mysql
   environment:
     - "constraint:typology==sys_mon"
   volumes_from:
     - zbxdata
 
 zbxserver:
-  build: zabbix-server
+  image: dockermeetupsinbordeaux/20150520-meetup-zabbix-server
   environment:
     - "constraint:typology==sys_mon"
   links:
     - zbxmysql:zabbix-db
 
 zbxweb:
-  build: zabbix-web
+  image: dockermeetupsinbordeaux/20150520-meetup-zabbix-web
   environment:
     - "constraint:typology==sys_mon"
   ports:
