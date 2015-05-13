@@ -1,0 +1,59 @@
+logs:
+  image: cogniteev/echo
+  environment:
+    - "constraint:typology==app_mon"
+  volumes:
+    - /var/log/containers
+data:
+  image: cogniteev/echo
+  environment:
+    - "constraint:typology==app_mon"
+  volumes:
+    - /data
+
+elasticsearch:
+  image: elasticsearch
+  environment:
+    - "constraint:typology==app_mon"
+
+logstash:
+  image: dockermeetupsinbordeaux/20150520-meetup-logstash
+  environment:
+    - "constraint:typology==app_mon"
+  links:
+    - elasticsearch
+    - riemann
+  volumes_from:
+    - logs
+
+kibana:
+  image: marcbachmann/kibana4
+  environment:
+    - "constraint:typology==app_mon"
+  links:
+    - elasticsearch:elasticsearch
+  ports:
+    - "5601:5601"
+
+riemann:
+  image: dockermeetupsinbordeaux/20150520-meetup-riemann
+  environment:
+    - "constraint:typology==app_mon"
+  links:
+    - graphite
+
+graphite:
+  image: cogniteev/graphite
+  environment:
+    - "constraint:typology==app_mon"
+  ports:
+    - "80:80"
+
+zbxsender:
+  image: dockermeetupsinbordeaux/docker-zabbix-sender
+  environment:
+    - "constraint:typology==app_mon"
+  environment:
+    ZABBIX_SERVER: zabbix
+  volumes:
+    - "/var/run/docker.sock:/var/run/docker.sock"

@@ -1,0 +1,37 @@
+weblogs:
+  image: cogniteev/echo
+  environment:
+    - "constraint:typology==front"
+  volumes:
+    - /var/log/containers
+
+webproxy:
+  image: dockermeetupsinbordeaux/20150520-meetup-webproxy
+  environment:
+    - "constraint:typology==front"
+  ports:
+    - "80:80"
+  environment:
+    UPSTREAM1_PORT_5000_TCP_ADDR: web01
+    UPSTREAM1_PORT_5000_TCP_PORT: 5000
+    UPSTREAM2_PORT_5000_TCP_ADDR: web02
+    UPSTREAM2_PORT_5000_TCP_PORT: 5000
+  volumes_from:
+    - weblogs
+
+webrsyslog:
+  image: cogniteev/rsyslogstash
+  volumes_from:
+    - weblogs
+  environment:
+    - "constraint:typology==front"
+    - LOGSTASH_PORT_514_TCP_ADDR=monitoring
+    - LOGSTASH_PORT_514_TCP_PORT=514
+
+webzbxsender:
+  image: dockermeetupsinbordeaux/docker-zabbix-sender
+  environment:
+    - ZABBIX_SERVER=zabbix
+    - "constraint:typology==front"
+  volumes:
+    - "/var/run/docker.sock:/var/run/docker.sock"

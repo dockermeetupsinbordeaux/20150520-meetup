@@ -1,0 +1,39 @@
+weblogs:
+  image: cogniteev/echo
+  environment:
+    - "constraint:node==web01"
+  volumes:
+    - /var/log/containers
+
+webflask:
+  image: dockermeetupsinbordeaux/20150520-meetup-web
+  environment:
+    - "constraint:node==web01"
+  command: >
+    uwsgi --socket 0.0.0.0:5000 -w app:app
+          --logto /var/log/containers/web.log
+  environment:
+    REDISSENTINEL1_1_PORT_26379_TCP_ADDR: redis01
+    REDISSENTINEL1_PORT_26379_TCP_PORT: 26379
+    REDISSENTINEL2_1_PORT_26379_TCP_ADDR: redis02
+    REDISSENTINEL2_PORT_26379_TCP_PORT: 26380
+  volumes_from:
+    - weblogs
+
+webrsyslog:
+  image: cogniteev/rsyslogstash
+  environment:
+    - "constraint:node==web01"
+    - LOGSTASH_PORT_514_TCP_ADDR=monitoring
+    - LOGSTASH_PORT_514_TCP_PORT=514
+  volumes_from:
+    - weblogs
+
+webzbxsender:
+  image: dockermeetupsinbordeaux/docker-zabbix-sender
+  environment:
+    - "constraint:node==web01"
+  environment:
+    ZABBIX_SERVER: zabbix
+  volumes:
+    - "/var/run/docker.sock:/var/run/docker.sock"

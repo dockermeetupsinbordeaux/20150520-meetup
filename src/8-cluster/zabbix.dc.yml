@@ -24,6 +24,6 @@ zbxweb:
   environment:
     - "constraint:typology==sys_mon"
   ports:
-    - "8081:80"
+    - "80:80"
   links:
     - zbxmysql:zabbix-db

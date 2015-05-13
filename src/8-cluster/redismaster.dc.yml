@@ -1,0 +1,56 @@
+logs:
+  image: cogniteev/echo
+  environment:
+    - "constraint:typology==redismaster"
+  volumes:
+    - /var/log/containers
+data:
+  image: cogniteev/echo
+  environment:
+    - "constraint:typology==redismaster"
+  volumes:
+    - /data
+
+redismaster:
+  image: dockermeetupsinbordeaux/20150520-meetup-redis
+  environment:
+    - "constraint:typology==redismaster"
+  command: >
+    redis-server --logfile /var/log/containers/redisnode.log
+                 --dbfilename redisnode.rdb
+                 --save 30 1
+  ports:
+    - "6379:6379"
+  volumes_from:
+    - data
+    - logs
+
+redissentinel:
+  image: dockermeetupsinbordeaux/20150520-meetup-sentinel
+  environment:
+    - "constraint:typology==redismaster"
+  volumes_from:
+    - data
+    - logs
+  ports:
+    - "26379:26379"
+
+rsyslog:
+  image: cogniteev/rsyslogstash
+  environment:
+    - "constraint:typology==redismaster"
+  volumes_from:
+    - logs
+  environment:
+    - "constraint:typology==redismaster"
+    - LOGSTASH_PORT_514_TCP_ADDR=monitoring
+    - LOGSTASH_PORT_514_TCP_PORT=514
+
+zbxsender:
+  image: dockermeetupsinbordeaux/docker-zabbix-sender
+  environment:
+    - "constraint:typology==redismaster"
+  environment:
+    ZABBIX_SERVER: zabbix
+  volumes:
+    - "/var/run/docker.sock:/var/run/docker.sock"
