@@ -6,7 +6,7 @@
 # (with --net=host docker run option)
 
 cat << EOF > /etc/sentinel.conf
-sentinel monitor "$CLUSTER_NAME" redi01 6379 1
+sentinel monitor "$CLUSTER_NAME" redis01 6379 1
 sentinel down-after-milliseconds "$CLUSTER_NAME" 5000
 sentinel failover-timeout "$CLUSTER_NAME" 180000
 sentinel parallel-syncs "$CLUSTER_NAME" 1
