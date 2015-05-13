@@ -152,3 +152,39 @@ riemann:
   build: riemann
   links:
     - graphite
+
+zbxdata:
+  image: cogniteev/echo
+  volumes:
+    - /var/lib/mysql
+
+zbxmysql:
+  build: zabbix-mysql
+  volumes_from:
+    - zbxdata
+
+zbxserver:
+  build: zabbix-server
+  links:
+    - zbxmysql:zabbix-db
+
+zbxweb:
+  build: zabbix-web
+  ports:
+    - "8081:80"
+  links:
+    - zbxmysql:zabbix-db
+
+zbxsender:
+  image: dockermeetupsinbordeaux/docker-zabbix-sender
+  command: --tlsverify=false -r
+  environment:
+    ZABBIX_HOST: standalone.docker.meetup
+    DOCKER_TLS_VERIFY: 1
+    DOCKER_CERT_PATH: /certs
+    DOCKER_HOST: tcp://192.168.99.100:2376
+  links:
+    - zbxserver:zabbix-server
+  volumes:
+#    - "/var/run/docker.sock:/var/run/docker.sock"
+    - "/Users/tristan/.docker/machine/machines/dev:/certs"

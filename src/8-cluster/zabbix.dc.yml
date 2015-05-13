@@ -1,0 +1,29 @@
+zbxdata:
+  image: cogniteev/echo
+  environment:
+    - "constraint:typology==sys_mon"
+  volumes:
+    - /var/lib/mysql
+
+zbxmysql:
+  build: zabbix-mysql
+  environment:
+    - "constraint:typology==sys_mon"
+  volumes_from:
+    - zbxdata
+
+zbxserver:
+  build: zabbix-server
+  environment:
+    - "constraint:typology==sys_mon"
+  links:
+    - zbxmysql:zabbix-db
+
+zbxweb:
+  build: zabbix-web
+  environment:
+    - "constraint:typology==sys_mon"
+  ports:
+    - "8081:80"
+  links:
+    - zbxmysql:zabbix-db
